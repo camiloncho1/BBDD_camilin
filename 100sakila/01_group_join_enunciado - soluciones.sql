@@ -1,9 +1,17 @@
 use sakila;
 
+
+
+
+
 -- ==============================================
 -- SECCIÓN A) 30 CONSULTAS CON JOIN DE 2 TABLAS
 -- ==============================================
+
+
 -- 1:  Para cada actor, muestra el número total de películas en las que aparece; es decir, cuenta cuántas filas de film_actor corresponden a cada actor.
+
+
 select first_name as nombre, last_name as apellido, count(film_id) as num_peliculas
 from actor
 join film_actor using(actor_id)
@@ -11,21 +19,225 @@ group by actor_id
 order by num_peliculas desc;
 
 
+
 -- 2:  Lista solo los actores que participan en 20 o más películas (umbral alto) con su conteo.
+
+
+select first_name as nombre, last_name as apellido, count(film_id) as num_peliculas
+from actor
+join film_actor using(actor_id)
+group by actor_id
+having count(film_id) >= 20
+order by count(film_id) desc;
+
+
+
 -- 3:  Para cada idioma, indica cuántas películas están catalogadas en ese idioma.
+
+select *
+from language
+join film using(language_id);
+
+
+
+select name, count(film_id) as peliculas
+from language
+join film using(language_id)
+group by name
+order by count(film_id) desc;
+
+
+
 -- 4:  Muestra el promedio de duración (length) de las películas por idioma y filtra aquellos idiomas con duración media estrictamente mayor a 110 minutos.
+
+select *
+from film join language using(language_id);
+
+
+
+select name as idioma, avg(length) as promedio_duracion
+from film join language using(language_id)
+group by idioma
+having promedio_duracion > 110;
+
+
 -- 5:  Para cada película, muestra cuántas copias hay en el inventario.
+
+
+select *
+from film
+join inventory
+	using(film_id);
+    
+select film_id as pelicula, count(inventory_id) as copias
+from film
+join inventory
+	using(film_id)
+group by pelicula;
+
+
+
 -- 6:  Lista solo las películas que tienen al menos 5 copias en inventario.
+
+
+select film_id as pelicula, count(inventory_id) as copias
+from film
+	join inventory
+		using(film_id)
+group by pelicula
+having copias >= 5;
+
+
+
 -- 7:  Para cada artículo de inventario, cuenta cuántos alquileres se han realizado.
+
+
+select *
+from inventory
+	join rental
+		using(inventory_id);
+        
+        
+select inventory_id, count(rental_id)
+from inventory
+	join rental
+		using(inventory_id)
+group by inventory_id;
+
+
+
 -- 8:  Para cada cliente, muestra cuántos alquileres ha realizado en total.
+
+select *
+from customer
+	join rental
+		using(customer_id);
+
+select customer_id as cliente, count(rental_id) as alquileres
+from customer
+	join rental
+		using(customer_id)
+group by customer_id;
+
+
+
 -- 9:  Lista los clientes con 30 o más alquileres acumulados.
+
+
+select customer_id as cliente, count(rental_id) as alquileres
+from customer
+	join rental
+		using(customer_id)
+group by customer_id
+having alquileres >= 30;
+
+
+
 -- 10:  Para cada cliente, muestra el total de pagos (suma en euros/dólares) que ha realizado.
+
+
+select * 
+from customer
+	join payment
+		using(customer_id);
+        
+select customer_id as cliente, sum(amount) as total_pagado
+from customer
+	join payment
+		using(customer_id)
+group by cliente;
+
+
+
 -- 11:  Muestra los clientes cuyo importe total pagado es al menos 200.
+
+
+select customer_id as cliente, sum(amount) as total_pagado
+from customer
+	join payment
+		using(customer_id)
+group by cliente
+having total_pagado >= 200;
+
+
+
 -- 12:  Para cada empleado (staff), muestra el número de pagos que ha procesado.
+
+
+select *
+from staff
+	join payment
+		using(staff_id);
+        
+select concat(first_name, " ", last_name) as empleado, count(payment_id) as pagos_procesados
+from staff
+	join payment
+		using(staff_id)
+group by empleado;
+
+
+
 -- 13:  Para cada empleado, muestra el importe total procesado.
+
+
+select *
+from staff
+	join payment
+		using(staff_id);
+        
+select concat(first_name, " ", last_name) as empleado, sum(amount) as importe_total
+from staff
+	join payment
+		using(staff_id)
+group by empleado;
+
+
+
 -- 14:  Para cada tienda, cuenta cuántos artículos de inventario tiene.
+
+select *
+from store
+	join inventory
+		using(store_id);
+
+select store_id as tienda, count(inventory_id) as articulos_inventario
+from store
+	join inventory
+		using(store_id)
+group by tienda;
+
+
+
 -- 15:  Para cada tienda, cuenta cuántos clientes tiene asignados.
+
+
+select *
+from store
+		join customer
+			using(store_id);
+
+select store_id as tienda, count(customer_id) as clientes_asignado
+from store
+		join customer
+			using(store_id)
+group by store_id;		
+
+
+
 -- 16:  Para cada tienda, cuenta cuántos empleados (staff) tiene asignados.
+
+
+select *
+from store
+		join staff
+			using(store_id);
+
+select store_id as tienda, count(staff_id) as num_empleados
+from store
+		join staff
+			using(store_id)
+group by tienda;
+
 -- 17:  Para cada dirección (address), cuenta cuántas tiendas hay ubicadas ahí (debería ser 0/1 en datos estándar).
 -- 18:  Para cada dirección, cuenta cuántos empleados residen en esa dirección.
 -- 19:  Para cada dirección, cuenta cuántos clientes residen ahí.
