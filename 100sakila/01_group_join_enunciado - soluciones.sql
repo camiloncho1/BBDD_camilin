@@ -470,20 +470,190 @@ from store
 	join rental
 		using(inventory_id)
 group by tienda;
-
 -- ==============================================
 -- SECCIÓN B) 30 CONSULTAS CON JOIN DE 3 TABLAS
 -- ==============================================
 -- 31:  Para cada actor, cuenta cuántas películas tiene y muestra solo los que superan 15 películas.
+    
+select * 
+from actor
+	join film_actor
+		using(actor_id)
+	join film
+		using(film_id);
+
+select actor_id as id_actor, concat(first_name, " ", last_name) as actor, count(film_id) as num_peliculas
+from actor
+	join film_actor
+		using(actor_id)
+	join film
+		using(film_id)
+group by id_actor
+having count(film_id) > 15
+order by num_peliculas asc;
+
 -- 32:  Para cada categoría (por nombre), cuenta cuántas películas hay en esa categoría.
+
+select * 
+from category
+	join film_category
+		using(category_id)
+	join film
+		using(film_id);
+
+select name as categoria, count(category_id) as numero_peliculas
+from category
+	join film_category
+		using(category_id)
+	join film
+		using(film_id)
+group by name;
+
 -- 33:  Para cada película, cuenta cuántos alquileres se han hecho de sus copias.
+
+select * 
+from film
+	join inventory
+		using(film_id)
+	join rental
+		using(inventory_id);
+
+select film_id as pelicula, count(rental_id) as num_alquileres
+from film
+	join inventory
+		using(film_id)
+	join rental
+		using(inventory_id)
+group by pelicula;
+
+
+/*select film_id as pelicula, count(rental_id) as num_alquileres
+from film
+	join inventory
+		using(film_id)
+	join rental
+		using(inventory_id)
+group by pelicula
+order by num_alquileres desc;
+*/
+
 -- 34:  Para cada cliente, suma el importe pagado en 2005 y filtra clientes con total >= 150.
+
+select * 
+from customer
+	join payment
+		using(customer_id);
+
+select customer_id as cliente, sum(amount) as monto
+from customer
+	join payment
+		using(customer_id)
+where year(payment_date) = 2005
+group by cliente
+having monto >= 150;
+
 -- 35:  Para cada tienda, suma el importe cobrado por todos sus empleados.
+
+select * 
+from store
+	join staff
+		using(store_id)
+	join payment
+		using(staff_id);
+
+select store_id as tienda, sum(amount) as importe_total_cobrado
+from store
+	join staff
+		using(store_id)
+	join payment
+		using(staff_id)
+group by tienda;        
+
 -- 36:  Para cada ciudad, cuenta cuántos empleados residen ahí (staff -> address -> city).
+
+select * 
+from city
+	join address
+		using(city_id)
+	join staff
+		using(address_id);
+
+select city as ciudad, count(staff_id)
+from city
+	join address
+		using(city_id)
+	join staff
+		using(address_id)
+group by ciudad;
+
 -- 37:  Para cada ciudad, cuenta cuántas tiendas existen (store -> address -> city).
+
+select * 
+from city
+	join address
+		using(city_id)
+	join store
+		using(address_id);
+        
+select city as ciudad, count(store_id)
+from city
+	join address
+		using(city_id)
+	join store
+		using(address_id)
+group by store_id;
+
 -- 38:  Para cada actor, calcula la duración media de sus películas del año 2006.
+
+select * 
+from actor
+	join film_actor
+		using(actor_id)
+	join film
+		using(film_id);
+        
+select concat(first_name, " ", last_name) as actor_actriz, avg(length) as prom_duracionPeliculas
+from actor
+	join film_actor
+		using(actor_id)
+	join film
+		using(film_id)
+where release_year = 2006
+group by actor_actriz;
+
 -- 39:  Para cada categoría, calcula la duración media y muestra solo las que superan 120.
+
+select *
+from category
+	join film_category
+		using(category_id)
+	join film
+		using(film_id);
+
+select name as categoria, avg(length) as prom_duracionPelicula
+from category
+	join film_category
+		using(category_id)
+	join film
+		using(film_id)
+group by categoria
+having avg(length) > 120;
+
 -- 40:  Para cada idioma, suma las tarifas de alquiler (rental_rate) de todas sus películas.
+
+select *
+from language
+	join film
+		using(language_id);
+
+select language_id as idioma, sum(rental_rate)
+from language
+	join film
+		using(language_id)
+group by idioma;
+
+
+        
 -- 41:  Para cada cliente, cuenta cuántos alquileres realizó en fines de semana (SÁB-DO) usando DAYOFWEEK (1=Domingo).
 -- 42:  Para cada actor, muestra el total de títulos distintos en los que participa (equivale a COUNT DISTINCT, sin subconsulta).
 -- 43:  Para cada ciudad, cuenta cuántos clientes residen ahí (customer -> address -> city).
